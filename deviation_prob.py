@@ -131,28 +131,28 @@ if __name__ == '__main__':
 
     # generate random Burr variates
     try:
-        burr_data = np.load("burr_data.npy")
+        burr_data = np.load("data/burr_data.npy")
     except FileNotFoundError:
         burr_data = []
         for c_i in c:
             for k_i in k:
                 burr_data.append(burr.rand((s, n), c_i, k_i))
         burr_data = np.asarray(burr_data)
-        np.save("burr_data.npy", burr_data)
+        np.save("data/burr_data.npy", burr_data)
 
     # generate random Frechet variates
     try:
-        frec_data = np.load("frec_data.npy")
+        frec_data = np.load("data/frec_data.npy")
     except FileNotFoundError:
         frec_data = []
         for g_i in gamma:
             frec_data.append(frechet.rand((s, n), g_i))
         frec_data = np.asarray(frec_data)
-        np.save("frec_data.npy", frec_data)
+        np.save("data/frec_data.npy", frec_data)
 
     # SA CVaR data for Burr distributions
     try:
-        burr_cvars_sa = np.load("burr_cvars_sa.npy")
+        burr_cvars_sa = np.load("data/burr_cvars_sa.npy")
     except FileNotFoundError:
         burr_cvars_sa = []
         for a in alph:
@@ -162,11 +162,11 @@ if __name__ == '__main__':
                 cvars_sa_alph.append(np.apply_along_axis(c_alph, 1, data))
             burr_cvars_sa.append(np.asarray(cvars_sa_alph))
         burr_cvars_sa = np.asarray(burr_cvars_sa)
-        np.save("burr_cvars_sa.npy", burr_cvars_sa)
+        np.save("data/burr_cvars_sa.npy", burr_cvars_sa)
 
     # SA CVaR data for Frechet distributions
     try:
-        frec_cvars_sa = np.load("frec_cvars_sa.npy")
+        frec_cvars_sa = np.load("data/frec_cvars_sa.npy")
     except FileNotFoundError:
         frec_cvars_sa = []
         for a in alph:
@@ -176,11 +176,11 @@ if __name__ == '__main__':
                 cvars_sa_alph.append(np.apply_along_axis(c_alph, 1, data))
             frec_cvars_sa.append(np.asarray(cvars_sa_alph))
         frec_cvars_sa = np.asarray(frec_cvars_sa)
-        np.save("frec_cvars_sa.npy", frec_cvars_sa)
+        np.save("data/frec_cvars_sa.npy", frec_cvars_sa)
 
     # EVT CVaR data for Burr distributions
     try:
-        burr_cvars_evt = np.load("burr_cvars_evt.npy")
+        burr_cvars_evt = np.load("data/burr_cvars_evt.npy")
     except FileNotFoundError:
         n_cpus = mp.cpu_count()
         pool = mp.Pool(n_cpus)
@@ -214,7 +214,7 @@ if __name__ == '__main__':
 
     # EVT CVaR data for Frechet distributions
     try:
-        frec_cvars_evt = np.load("frec_cvars_evt.npy")
+        frec_cvars_evt = np.load("data/frec_cvars_evt.npy")
     except FileNotFoundError:
         n_cpus = mp.cpu_count()
         pool = mp.Pool(n_cpus)
@@ -242,7 +242,7 @@ if __name__ == '__main__':
                 cvars_evt_fu.append(np.asarray(cvars_evt_alph))
             frec_cvars_evt.append(np.asarray(cvars_evt_fu))
         frec_cvars_evt = np.asarray(frec_cvars_evt)
-        np.save("frec_cvars_evt.npy", frec_cvars_evt)
+        np.save("data/frec_cvars_evt.npy", frec_cvars_evt)
         print("Finished calculating EVT CVaRs for Frechet distributions \
                 in {:.2f} minutes.".format(t_total))
 
