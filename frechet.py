@@ -67,15 +67,10 @@ def cvar_bound(u, eta, alph, gamma):
     + 1/xi/(xi+rho)/(1-eta) \
     )
 
-def frequency_func(cvars, cvar_true, eps):
-    n = cvars.shape[0]
-    abs_err = np.abs(cvars - cvar_true)
-    return np.apply_along_axis(sum, 0, abs_err > eps)/n
-
 if __name__ == '__main__':
     eta = 1e-9
     gamma = 2
-    alph = 0.9995
+    alph = 0.999
     q_true = var(alph, gamma)
     u_init = var(0.9, gamma)
     u_vals = np.linspace(u_init, q_true, 1000)

@@ -5,7 +5,7 @@ import warnings
 def get_excesses(x, threshold):
     exceedances = x[x > threshold]
     if len(exceedances) == 0:
-        print("No data above threshold")
+        #print("No data above threshold")
         return np.nan
     return exceedances - threshold
 
@@ -41,7 +41,7 @@ def cvar_evt(x, alph, Fu):
     u = np.quantile(x, Fu)
     xi, sig = gpdFit(x, u)
     if xi >= 1:
-        print("No valid shape parameter found")
+        #print("No valid shape parameter found")
         return np.nan
     q = u + sig/xi * (((1-alph)/(1-Fu))**(-xi) - 1)
     return (q + sig - xi*u)/(1-xi)
