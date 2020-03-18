@@ -5,7 +5,6 @@ import warnings
 def get_excesses(x, threshold):
     exceedances = x[x > threshold]
     if len(exceedances) == 0:
-        #print("No data above threshold")
         return np.nan
     return exceedances - threshold
 
@@ -32,21 +31,24 @@ def cvar_gpd(alph, shape, scale):
     q = qgpd(alph, shape, scale)
     return (q+scale)*(1+shape*q/scale)**(-1/shape)/((1-alph)*(1-shape))
 
+def var_sa(x, alph):
+    x_ord = np.sort(x)
+    return x_ord[int(np.ceil(alph*len(x)))]
+
+def cvar_sa(x, alph):
+	q = var_sa(x, alph)
+	y = x[x >= q]
+	return np.mean(y)
+
 def var_evt(x, alph, Fu):
-    u = np.quantile(x, Fu)
+    u = var_sa(x, Fu)
     xi, sig = gpdFit(x, u)
     return u + sig/xi * (((1-alph)/(1-Fu))**(-xi) - 1)
 
 def cvar_evt(x, alph, Fu):
-    u = np.quantile(x, Fu)
+    u = var_sa(x, Fu)
     xi, sig = gpdFit(x, u)
     if xi >= 1:
-        #print("No valid shape parameter found")
         return np.nan
     q = u + sig/xi * (((1-alph)/(1-Fu))**(-xi) - 1)
     return (q + sig - xi*u)/(1-xi)
-
-def cvar_sa(x, alph):
-	q = np.quantile(x, alph)
-	y = x[x >= q]
-	return np.mean(y)
