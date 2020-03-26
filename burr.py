@@ -15,23 +15,6 @@ class Burr():
         k = self.k
         return 1 - (1 + x**c)**(-k)
 
-    def U(self, t):
-        c = self.c
-        k = self.k
-        return (t**(1/k) - 1)**(1/c)
-
-    def Uprime(self, t):
-        c = self.c
-        k = self.k
-        return 1/c/k * t**(1/k-1) * (t**(1/k) - 1)**(1/c-1)
-
-    def evtLim(self, x):
-        xi = self.xi
-        return (x**xi - 1)/xi
-
-    def aux_fun(self, n, k):
-        return n/k * self.Uprime(n/k)
-
     def rand(self, n):
         c = self.c
         k = self.k
@@ -63,24 +46,36 @@ class Burr():
         sig = self.sigma(u)
         return q/(1-xi) + (sig-xi*u)/(1-xi)
 
-    def A2(self, t):
+    def A(self, t):
         c = self.c
         k = self.k
         return (1-c)/(c * k * (t**(1/k) - 1))
 
-    def A(self, t):
-        xi = self.xi
-        rho = self.rho
-        return xi * t**rho
+    def U(self, t):
+        c = self.c
+        k = self.k
+        return (t**(1/k) - 1)**(1/c)
 
-    def tau(self, u):
-        return 1 - self.cdf(u)
+    def Uprime(self, t):
+        c = self.c
+        k = self.k
+        return 1/c/k * t**(1/k-1) * (t**(1/k) - 1)**(1/c-1)
+
+    def evtLim(self, x):
+        xi = self.xi
+        return (x**xi - 1)/xi
+
+    def aux_fun(self, t):
+        return t * self.Uprime(t)
 
     def sigma(self, u):
         c = self.c
         k = self.k
         t = self.tau(u)
-        return 1/c/k * t**(-1/k) * (t**(-1/k) - 1)**(1/c - 1)
+        return t*(-np.log(1-t))**(-1-1/gamma) / (1-t) / gamma
+
+    def tau(self, u):
+        return 1 - self.cdf(u)
 
     def s(self, u, alph):
         return self.tau(u)/(1-alph)
@@ -137,24 +132,9 @@ class Burr():
             L = tmp
         return L, U
 
-    def sample_complexity(self, eps, delt, Fu, alph):
-        xi = self.xi
-        u = self.var(Fu)
-        sig = self.sigma(u)
-        psi = asymp_var(xi, sig, Fu, alph)
-        norm_q = norm.ppf(1-delt/2)
-        Bu = np.abs(self.cvar_bounds(u, 0, alph)[0])
-        return psi/(1-Fu) * (norm_q/(eps-Bu))**2
-
-    def mle_bias(self, n, k):
-        #k = self.num_excesses(n)
+    def mle_bias(self, n, n_excesses):
         xi = self.xi
         rho = self.rho
-        sig = self.aux_fun(n, k)
-        return self.A2(n/k)/(1-rho)/(1+xi-rho) * np.array((xi+1, -sig*rho))
-
-    def num_excesses(self, n):
-        xi = self.xi
-        rho = self.rho
-        r = 2/(2+self.k)
-        return int(n**r)
+        t = n/n_excesses
+        sig = self.aux_fun(t)
+        return self.A(t)/(1-rho)/(1+xi-rho) * np.array((xi+1, -sig*rho))

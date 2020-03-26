@@ -9,20 +9,17 @@ if __name__ == '__main__':
     B = Burr(2, 1)
     s = 2000
     n = 100000
-    k = 1000 #B.num_excesses(n)
-    #Fu = 1 - k/n
-    #u = B.var(Fu)
+    n_excesses = 1000
     xi = B.xi
-    sig = B.aux_fun(n, k)
-    parms_mle = np.array((xi, sig)) + B.mle_bias(n, k)
+    sig = B.aux_fun(n/n_excesses)
+    parms_mle = np.array((xi, sig)) + B.mle_bias(n, n_excesses)
     data = B.rand((s, n))
-    #excesses = np.sort(data)[:, -k:] - u
 
     n_cpus = mp.cpu_count()
     pool = mp.Pool(n_cpus)
 
-    result = [pool.apply_async(gpdFit2,
-                args=(x, k)) for x in data]
+    result = [pool.apply_async(gpdFit,
+                args=(x, n_excesses)) for x in data]
     params = []
     for r in result:
         params.append(r.get())
@@ -32,13 +29,13 @@ if __name__ == '__main__':
     avar = avar_mle(xi, sig)
     m = mse(params, (xi, sig))
     b = bias(params, (xi, sig))
-    crb = np.asarray([avar[0,0], avar[1,1]])/k
+    crb = np.asarray([avar[0,0], avar[1,1]])/n_excesses
     eff = crb/m
 
     avar2 = avar_mle(parms_mle[0], parms_mle[1])
     m2 = mse(params, parms_mle)
     b2 = bias(params, parms_mle)
-    crb2 = np.asarray([avar2[0,0], avar2[1,1]])/k
+    crb2 = np.asarray([avar2[0,0], avar2[1,1]])/n_excesses
     eff2 = crb2/m2
 
     print("WITH TRUE VALS:")
