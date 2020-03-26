@@ -15,6 +15,15 @@ def gpdFit(x, threshold):
         shape, _, scale = genpareto.fit(y, floc=0)
     return shape, scale
 
+def gpdFit2(x, num_excesses):
+    excesses = np.sort(x)[-num_excesses:]
+    thresh = excesses[0]
+    excesses -= thresh
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        shape, _, scale = genpareto.fit(excesses, floc=0)
+    return shape, scale
+
 def rgpd(n, shape, scale):
     # Random number generation for the GPD
     return genpareto.rvs(shape, 0, scale, n)
@@ -32,6 +41,8 @@ def cvar_gpd(alph, shape, scale):
     return (q+scale)*(1+shape*q/scale)**(-1/shape)/((1-alph)*(1-shape))
 
 def var_sa(x, alph):
+    if alph == 0:
+        return 0
     x_ord = np.sort(x)
     return x_ord[int(np.ceil(alph*len(x)))]
 

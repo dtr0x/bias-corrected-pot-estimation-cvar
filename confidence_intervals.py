@@ -22,10 +22,10 @@ def cvar_iter_sa(x, alph, sampsizes):
 
 if __name__ == '__main__':
     np.random.seed(7)
-    alph = 0.99
-    c = 2
-    k = 1.5
-    gamma = 5
+    alph = 0.999
+    c = 1.5
+    k = 1
+    gamma = 2
     Fu = 0.975
     s = 2000
     n = 40000
@@ -34,11 +34,11 @@ if __name__ == '__main__':
 
     Nus = np.asarray([(1-Fu)*n for n in sampsizes])
 
-    burr_data = np.load("data/burr_data.npy")[3]
-    frec_data = np.load("data/frec_data.npy")[3]
+    burr_data = np.load("data/burr_data.npy")[0]
+    frec_data = np.load("data/frec_data.npy")[0]
 
-    burr_cvars_evt = np.load("data/burr_cvars_evt.npy")[1][0][3]
-    frec_cvars_evt = np.load("data/frec_cvars_evt.npy")[1][0][3]
+    burr_cvars_evt = np.load("data/burr_cvars_evt.npy")[1][1][0]
+    frec_cvars_evt = np.load("data/frec_cvars_evt.npy")[1][1][0]
 
     B = Burr()
     F = Frechet()

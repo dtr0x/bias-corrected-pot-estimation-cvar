@@ -1,30 +1,54 @@
 import numpy as np
-from eva import rgpd, gpdFit
+from eva import *
 from asymp_var import *
 import multiprocessing as mp
+from burr import *
 
 if __name__ == '__main__':
     np.random.seed(7)
-    xi = 0.25
-    sig = 1
-    s = 10000
-    n = 1000
-    data = rgpd((s, n), xi, sig)
+    B = Burr(2, 1)
+    s = 2000
+    n = 100000
+    k = 1000 #B.num_excesses(n)
+    #Fu = 1 - k/n
+    #u = B.var(Fu)
+    xi = B.xi
+    sig = B.aux_fun(n, k)
+    parms_mle = np.array((xi, sig)) + B.mle_bias(n, k)
+    data = B.rand((s, n))
+    #excesses = np.sort(data)[:, -k:] - u
 
     n_cpus = mp.cpu_count()
     pool = mp.Pool(n_cpus)
 
-    result = [pool.apply_async(gpdFit,
-                args=(x, 0)) for x in data]
+    result = [pool.apply_async(gpdFit2,
+                args=(x, k)) for x in data]
     params = []
     for r in result:
         params.append(r.get())
     params = np.asarray(params)
+    params_avg = np.mean(params, axis=0)
 
     avar = avar_mle(xi, sig)
+    m = mse(params, (xi, sig))
     b = bias(params, (xi, sig))
-    crb = np.asarray([avar[0,0], avar[1,1]])/n
-    eff = crb/mse(params, (xi, sig))
+    crb = np.asarray([avar[0,0], avar[1,1]])/k
+    eff = crb/m
 
+    avar2 = avar_mle(parms_mle[0], parms_mle[1])
+    m2 = mse(params, parms_mle)
+    b2 = bias(params, parms_mle)
+    crb2 = np.asarray([avar2[0,0], avar2[1,1]])/k
+    eff2 = crb2/m2
+
+    print("WITH TRUE VALS:")
+    print("True (Xi, Sigma): {:.3f}, {:.3f}.".format(xi, sig))
+    print("Mean (Xi, Sigma): {:.3f}, {:.3f}.".format(params_avg[0], params_avg[1]))
     print("Bias (Xi, Sigma): {:.3f}, {:.3f}.".format(b[0], b[1]))
     print("Efficiency (Xi, Sigma): {:.3f}, {:.3f}.".format(eff[0], eff[1]))
+
+    print("WITH BIASED VALS:")
+    print("True (Xi, Sigma): {:.3f}, {:.3f}.".format(parms_mle[0], parms_mle[1]))
+    print("Mean (Xi, Sigma): {:.3f}, {:.3f}.".format(params_avg[0], params_avg[1]))
+    print("Bias (Xi, Sigma): {:.3f}, {:.3f}.".format(b2[0], b2[1]))
+    print("Biased Efficiency (Xi, Sigma): {:.3f}, {:.3f}.".format(eff2[0], eff2[1]))

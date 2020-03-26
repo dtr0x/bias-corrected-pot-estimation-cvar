@@ -1,9 +1,15 @@
 import numpy as np
 from scipy.stats import genpareto
 
-def avar_mle(xi, sig):
+def avar_mle2(xi, sig):
     var_sh = (1+xi)**2
     var_sc = 2*sig**2 * (1+xi)
+    cov = -sig*(1+xi)
+    return np.asarray([[var_sh, cov], [cov, var_sc]])
+
+def avar_mle(xi, sig):
+    var_sh = (1+xi)**2
+    var_sc = sig**2 * (1 + (1+xi)**2)
     cov = -sig*(1+xi)
     return np.asarray([[var_sh, cov], [cov, var_sc]])
 

@@ -25,7 +25,7 @@ def frequency_func(cvars, cvar_true, eps):
     return np.apply_along_axis(sum, 0, abs_err > eps)/n
 
 def samp_complexity(Fu, phi_u, B_u, eps, delt):
-    pass    
+    pass
 
 if __name__ == '__main__':
     np.random.seed(7)
@@ -34,29 +34,12 @@ if __name__ == '__main__':
     k = np.array([1, 1.5])
     gamma = np.array([2, 3, 4, 5])
     Fus = np.array([0.95, 0.975])
-    eta = 0.025
+    eta = 0
     err = 0.15
     s = 2000
     n = 40000
     step = 1000
     sampsizes = np.array([i for i in range(step, n+1, step)])
-
-    frec_eta = []
-    for fu in Fus:
-        for a in alph:
-            for g in gamma:
-                frec_eta.append(frechet.find_min_eta(fu, a, g))
-    print("Min Frechet eta: {:.4f}".format(min(frec_eta)))
-    print("Max Frechet eta: {:.4f}".format(max(frec_eta)))
-
-    burr_eta = []
-    for fu in Fus:
-        for a in alph:
-            for c_i in c:
-                for k_i in k:
-                    burr_eta.append(burr.find_min_eta(fu, a, c_i, k_i))
-    print("Min Burr eta: {:.4f}".format(min(burr_eta)))
-    print("Max Burr eta: {:.4f}".format(max(burr_eta)))
 
     # number of threshold excesses for each sample size
     Nus = np.asarray([[(1-fu)*n for n in sampsizes] for fu in Fus])
