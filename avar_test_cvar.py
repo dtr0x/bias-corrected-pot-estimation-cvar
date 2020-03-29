@@ -2,25 +2,26 @@ import numpy as np
 from eva import *
 from asymp_var import *
 import multiprocessing as mp
-from burr import *
+from burr import Burr
+from frechet import Frechet
 import sys
 from scipy.stats import norm
 
 if __name__ == '__main__':
     np.random.seed(7)
     alph = 0.999
-    B = Burr(2, 1)
+    D = Burr(0.75, 2.5)
     s = 2000
-    n = 200000
-    n_excesses = 2500
+    n = 100000
+    n_excesses = 2000
     Fu = 1 - n_excesses/n
-    u = B.var(Fu)
-    xi = B.xi
-    sig = B.aux_fun(n/n_excesses)
-    parms_mle = np.array((xi, sig)) + B.mle_bias(n, n_excesses)
-    cvar_true = B.cvar(alph)
-    cvar_biased = B.cvar_approx_params(u, alph, parms_mle[0], parms_mle[1])
-    data = B.rand((s, n))
+    u = D.var(Fu)
+    xi = D.xi
+    sig = D.sigma(u)
+    parms_mle = np.array((xi, sig)) + D.mle_bias(u)
+    cvar_true = D.cvar(alph)
+    cvar_biased = D.cvar_approx_params(u, alph, parms_mle[0], parms_mle[1])
+    data = D.rand((s, n))
 
     n_cpus = mp.cpu_count()
     pool = mp.Pool(n_cpus)
@@ -49,10 +50,11 @@ if __name__ == '__main__':
     print("Efficiency: {:.3f}.".format(eff))
 
     # additional bias terms
-    b1 = cvar_biased - B.cvar_approx_params(u, alph, xi, sig)
-    b2 = B.cvar_bound(u, alph)
-    delt = 0.1
-    conf_means = cvars - b1 - b2
+    thresholds = np.sort(data)[:, -n_excesses]
+    b1 = cvar_biased - D.cvar_approx_params(thresholds, alph, xi, sig)
+    b2 = D.cvar_bound(thresholds, alph)
+    delt = 0.05
+    conf_means = cvars + b1 + b2
     conf_std = np.sqrt(crb) * norm.ppf(1-delt/2)
     conf_ints = np.array((conf_means - conf_std, \
                 conf_means + conf_std)).transpose()

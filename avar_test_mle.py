@@ -3,19 +3,22 @@ from eva import *
 from asymp_var import *
 import multiprocessing as mp
 from burr import *
+from frechet import *
 import sys
 
 if __name__ == '__main__':
     np.random.seed(7)
-    #B = Burr(2/3, 2)
-    B = Burr(1, 2)
+    alph = 0.999
+    D = Burr(0.75, 2.5)
     s = 2000
     n = 100000
-    n_excesses = 2500
-    xi = B.xi
-    sig = B.aux_fun(n/n_excesses)
-    parms_mle = np.array((xi, sig)) + B.mle_bias(n, n_excesses)
-    data = B.rand((s, n))
+    n_excesses = 2000
+    Fu = 1 - n_excesses/n
+    u = D.var(Fu)
+    xi = D.xi
+    sig = D.sigma(u)
+    parms_mle = np.array((xi, sig)) + D.mle_bias(u)
+    data = D.rand((s, n))
 
     n_cpus = mp.cpu_count()
     pool = mp.Pool(n_cpus)

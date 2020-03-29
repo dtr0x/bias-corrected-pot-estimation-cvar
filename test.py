@@ -1,9 +1,10 @@
 from burr import Burr
+from frechet import Frechet
 import numpy as np
 import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
-    B = Burr(2/3, 2)
+    B = Burr(1.5, 2)
     alph = 0.999
     Fu_min = 0.95
     q_true = B.var(alph)
