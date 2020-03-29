@@ -3,13 +3,15 @@ from eva import *
 from asymp_var import *
 import multiprocessing as mp
 from burr import *
+import sys
 
 if __name__ == '__main__':
     np.random.seed(7)
-    B = Burr(2, 1)
+    #B = Burr(2/3, 2)
+    B = Burr(1, 2)
     s = 2000
     n = 100000
-    n_excesses = 1000
+    n_excesses = 2500
     xi = B.xi
     sig = B.aux_fun(n/n_excesses)
     parms_mle = np.array((xi, sig)) + B.mle_bias(n, n_excesses)

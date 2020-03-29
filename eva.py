@@ -40,11 +40,13 @@ def cvar_sa(x, alph):
 
 def var_evt(x, alph, n_excesses):
     u = np.sort(x)[-n_excesses]
+    Fu = 1 - n_excesses/len(x)
     xi, sig = gpdFit(x, n_excesses)
     return u + sig/xi * (((1-alph)/(1-Fu))**(-xi) - 1)
 
 def cvar_evt(x, alph, n_excesses):
     u = np.sort(x)[-n_excesses]
+    Fu = 1 - n_excesses/len(x)
     xi, sig = gpdFit(x, n_excesses)
     if xi >= 1:
         return np.nan

@@ -36,14 +36,22 @@ class Burr():
 
     def var_approx(self, u, alph):
         xi = self.xi
-        sig = self.sigma(u)
         Fbar = self.tau(u)
+        sig = self.aux_fun(1/Fbar)
         return u + sig/xi * (((1-alph)/Fbar)**(-xi) - 1)
 
     def cvar_approx(self, u, alph):
         xi = self.xi
         q = self.var_approx(u, alph)
-        sig = self.sigma(u)
+        sig = self.aux_fun(1/self.tau(u))
+        return q/(1-xi) + (sig-xi*u)/(1-xi)
+
+    def var_approx_params(self, u, alph, xi, sig):
+        Fbar = self.tau(u)
+        return u + sig/xi * (((1-alph)/Fbar)**(-xi) - 1)
+
+    def cvar_approx_params(self, u, alph, xi, sig):
+        q = self.var_approx_params(u, alph, xi, sig)
         return q/(1-xi) + (sig-xi*u)/(1-xi)
 
     def A(self, t):
@@ -68,12 +76,6 @@ class Burr():
     def aux_fun(self, t):
         return t * self.Uprime(t)
 
-    def sigma(self, u):
-        c = self.c
-        k = self.k
-        t = self.tau(u)
-        return t*(-np.log(1-t))**(-1-1/gamma) / (1-t) / gamma
-
     def tau(self, u):
         return 1 - self.cdf(u)
 
@@ -88,6 +90,26 @@ class Burr():
             return 1/rho * (t**(xi+rho)/(xi+rho) - t**xi/xi) + 1/xi/(xi+rho)
         else:
             return 1/xi * (t**xi/xi - 1/xi - np.log(t))
+
+    def var_bound(self, u, alph):
+        t = self.s(u,alph)
+        r = 1/self.tau(u)
+        sig = self.aux_fun(r)
+        A_r = self.A(r)
+        I_t = self.I(u, alph)
+        return sig * A_r * I_t
+
+    def cvar_bound(self, u, alph):
+        xi = self.xi
+        rho = self.rho
+        t = self.s(u,alph)
+        r = 1/self.tau(u)
+        sig = self.aux_fun(r)
+        A_r = self.A(r)
+        x1 = t**(xi+rho)/rho/(xi+rho)/(1-xi-rho)
+        x2 = t**xi/rho/xi/(1-xi)
+        x3 = 1/xi/(xi+rho)
+        return sig * A_r * (x1 - x2 + x3)
 
     def var_bounds(self, u, eta, alph):
         t = self.s(u,alph)
