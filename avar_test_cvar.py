@@ -54,7 +54,7 @@ if __name__ == '__main__':
     b1 = cvar_biased - D.cvar_approx_params(thresholds, alph, xi, sig)
     b2 = D.cvar_bound(thresholds, alph)
     delt = 0.05
-    conf_means = cvars + b1 + b2
+    conf_means = cvars + b1 - b2
     conf_std = np.sqrt(crb) * norm.ppf(1-delt/2)
     conf_ints = np.array((conf_means - conf_std, \
                 conf_means + conf_std)).transpose()
