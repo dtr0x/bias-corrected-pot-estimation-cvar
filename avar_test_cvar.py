@@ -10,10 +10,11 @@ from scipy.stats import norm
 if __name__ == '__main__':
     np.random.seed(7)
     alph = 0.999
-    D = Burr(0.75, 2.5)
+    D = Burr(1.5, 1)
+    #D = Frechet(2)
     s = 2000
     n = 100000
-    n_excesses = 2000
+    n_excesses = 2500
     Fu = 1 - n_excesses/n
     u = D.var(Fu)
     xi = D.xi
@@ -51,9 +52,9 @@ if __name__ == '__main__':
 
     # additional bias terms
     thresholds = np.sort(data)[:, -n_excesses]
-    b1 = cvar_biased - D.cvar_approx_params(thresholds, alph, xi, sig)
-    b2 = D.cvar_bound(thresholds, alph)
-    delt = 0.05
+    b1 = cvar_biased - D.cvar_approx_params(u, alph, xi, sig)
+    b2 = D.cvar_bound(u, alph)
+    delt = 0.1
     conf_means = cvars + b1 - b2
     conf_std = np.sqrt(crb) * norm.ppf(1-delt/2)
     conf_ints = np.array((conf_means - conf_std, \
