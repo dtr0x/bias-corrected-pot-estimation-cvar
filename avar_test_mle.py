@@ -9,11 +9,10 @@ import sys
 if __name__ == '__main__':
     np.random.seed(7)
     alph = 0.999
-    #D = Burr(0.75, 2.5)
-    D = Frechet(1.5)
-    s = 2000
-    n = 100000
-    n_excesses = 2500
+    D = Frechet(2)
+    s = 5000
+    n = 10000
+    n_excesses = np.ceil(n**(2/3)).astype(int)
     Fu = 1 - n_excesses/n
     u = D.var(Fu)
     xi = D.xi

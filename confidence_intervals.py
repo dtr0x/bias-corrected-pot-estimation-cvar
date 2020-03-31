@@ -39,7 +39,7 @@ def confidence_intervals(dists, n_excesses, Fus, alph, delt, cvars_evt):
             bias1 = cvar_mle_bias(d, xi, sig, u, alph)
             bias2 = -d.cvar_bound(u, alph)
 
-            cvars_corrected = cvars_evt[i, :, j] + bias1 + bias2
+            cvars_corrected = cvars_evt[i, :, j] - bias1 - bias2
 
             av = avar(d, xi, sig, Fu, u, alph)/n_excesses[j]
             stdev = np.sqrt(av) * norm.ppf(1-delt/2)

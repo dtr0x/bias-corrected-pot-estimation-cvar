@@ -10,11 +10,10 @@ from scipy.stats import norm
 if __name__ == '__main__':
     np.random.seed(7)
     alph = 0.999
-    D = Burr(1.5, 1)
-    #D = Frechet(2)
+    D = Burr(0.5, 3)
     s = 2000
-    n = 100000
-    n_excesses = 2500
+    n = 50000
+    n_excesses = np.ceil(n**(2/3)).astype(int)
     Fu = 1 - n_excesses/n
     u = D.var(Fu)
     xi = D.xi
@@ -50,13 +49,21 @@ if __name__ == '__main__':
     print("CRB: {:.3f}.".format(crb))
     print("Efficiency: {:.3f}.".format(eff))
 
-    # additional bias terms
     thresholds = np.sort(data)[:, -n_excesses]
-    b1 = cvar_biased - D.cvar_approx_params(u, alph, xi, sig)
-    b2 = D.cvar_bound(u, alph)
+    sigs = D.sigma(thresholds)
+    mle_means = [np.array((xi, sig)) + D.mle_bias(u) for \
+                    sig, u in zip(sigs, thresholds)]
+    cvar_mle = np.array([D.cvar_approx_params(u, alph, *params) for \
+                    u, params in zip(thresholds, mle_means)])
+    cvar_evt = np.array([D.cvar_approx_params(u, alph, xi, sig) for \
+                    sig, u in zip(sigs, thresholds)])
+    b1 = cvar_biased - cvar_evt
+    b2 = -D.cvar_bound(thresholds, alph)
     delt = 0.1
-    conf_means = cvars + b1 - b2
-    conf_std = np.sqrt(crb) * norm.ppf(1-delt/2)
+    conf_means = cvars - b1 - b2
+    avars = np.array([asymp_var_biased(xi, sig, *parms, Fu, alph) for \
+                sig, parms in zip(sigs, mle_means)])
+    conf_std = np.sqrt(avars/n_excesses) * norm.ppf(1-delt/2)
     conf_ints = np.array((conf_means - conf_std, \
                 conf_means + conf_std)).transpose()
     coverage = 0
