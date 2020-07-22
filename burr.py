@@ -3,38 +3,38 @@ from scipy.special import hyp2f1
 from distribution import Distribution
 
 class Burr(Distribution):
-    def __init__(self, c, k):
+    def __init__(self, c, d):
         self.c = c
-        self.k = k
-        self.xi = 1/c/k
-        self.rho = -1/k
+        self.d = d
+        self.xi = 1/c/d
+        self.rho = -1/d
+        xi = self.xi
+        rho = self.rho
+        self.b = 1/(1-rho)/(1+xi-rho) * np.array((xi+1, -rho))
 
     def cdf(self, x):
         c = self.c
-        k = self.k
-        return 1 - (1 + x**c)**(-k)
+        d = self.d
+        return 1 - (1 + x**c)**(-d)
 
-    def sigma(self, u):
+    def a(self, t):
         c = self.c
-        k = self.k
-        t = self.tau(u)
-        return 1/c/k * t**(-1/k) * (t**(-1/k) - 1)**(1/c - 1)
+        d = self.d
+        return t**(1/d)/c/d * (t**(1/d) - 1)**(1/c - 1)
 
     def var(self, alph):
         c = self.c
-        k = self.k
-        return ((1-alph)**(-1/k) - 1)**(1/c)
+        d = self.d
+        return ((1-alph)**(-1/d) - 1)**(1/c)
 
     def cvar(self, alph):
         c = self.c
-        k = self.k
-        Fv = 1-alph
-        r = -1/c
-        s = k-1/c
-        t = 1-1/c+k
-        return c*k/(c*k-1) * Fv**(-1/(c*k)) * hyp2f1(r, s, t, Fv**(1/k))
+        d = self.d
+        q = self.var(alph)
+        return 1/(1-alph) * (d * ((1/q)**c)**(d-1/c))/(d-1/c) * \
+                hyp2f1(d-1/c, 1+d, d-1/c+1, -1/q**c)
 
     def A(self, t):
         c = self.c
-        k = self.k
-        return (1-c)/(c * k * (t**(1/k) - 1))
+        d = self.d
+        return (1-c)/(c * d * (t**(1/d) - 1))

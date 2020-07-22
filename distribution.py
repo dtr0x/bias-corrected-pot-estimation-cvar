@@ -13,66 +13,59 @@ class Distribution:
     def A(self, t):
         pass
 
-    def sigma(self, u):
-        pass
-
     def rand(self, n):
         p = np.random.uniform(size=n)
         return self.var(p)
 
-    def var_approx(self, u, alph):
+    def var_approx(self, t, alph):
         xi = self.xi
-        Fbar = self.tau(u)
-        sig = self.sigma(u)
-        return u + sig/xi * (((1-alph)/Fbar)**(-xi) - 1)
+        sig = self.a(t)
+        u = self.var(1-1/t)
+        return u + sig/xi * ((t*(1-alph))**(-xi) - 1)
 
-    def cvar_approx(self, u, alph):
+    def cvar_approx(self, t, alph):
         xi = self.xi
-        q = self.var_approx(u, alph)
-        sig = self.sigma(u)
-        return q/(1-xi) + (sig-xi*u)/(1-xi)
+        q = self.var_approx(t, alph)
+        sig = self.a(t)
+        u = self.var(1-1/t)
+        return (q + sig - xi*u)/(1-xi)
 
-    def var_approx_params(self, u, alph, xi, sig):
-        Fbar = self.tau(u)
-        return u + sig/xi * (((1-alph)/Fbar)**(-xi) - 1)
-
-    def cvar_approx_params(self, u, alph, xi, sig):
-        q = self.var_approx_params(u, alph, xi, sig)
-        return q/(1-xi) + (sig-xi*u)/(1-xi)
-
-    def tau(self, u):
-        return 1 - self.cdf(u)
-
-    def s(self, u, alph):
-        return self.tau(u)/(1-alph)
-
-    def I(self, u, alph):
+    def I(self, t, alph):
         xi = self.xi
         rho = self.rho
-        t = self.s(u,alph)
-        return 1/rho * (t**(xi+rho)/(xi+rho) - t**xi/xi) + 1/xi/(xi+rho)
+        s = 1/t/(1-alph)
+        return 1/rho * ((s**(xi+rho)-1)/(xi+rho) - (s**xi-1)/xi)
 
-    def var_bound(self, u, alph):
-        t = self.s(u,alph)
-        sig = self.sigma(u)
-        A_t = self.A(1/self.tau(u))
-        I_t = self.I(u, alph)
-        return sig * A_t * I_t
+    def var_approx_error(self, t, alph):
+        sig = self.a(t)
+        A = self.A(t)
+        I = self.I(t, alph)
+        return -sig * A * I
 
-    def cvar_bound(self, u, alph):
-        xi = self.xi
+    def cvar_approx_error(self, t, alph, xi=None, sig=None):
         rho = self.rho
-        t = self.s(u,alph)
-        sig = self.sigma(u)
-        A_t = self.A(1/self.tau(u))
-        x1 = t**(xi+rho)/rho/(xi+rho)/(1-xi-rho)
-        x2 = t**xi/rho/xi/(1-xi)
-        x3 = 1/xi/(xi+rho)
-        return sig * A_t * (x1 - x2 + x3)
+        if not (xi and sig):
+            xi = self.xi
+            sig = self.a(t)
+        A = self.A(t)
+        s = 1/t/(1-alph)
+        x1 = s**xi/xi/(1-xi)
+        x2 = s**(xi+rho)/(xi+rho)/(1-xi-rho)
+        x3 = rho/xi/(xi+rho)
+        return sig * A * (x1 - x2 - x3) / rho
 
-    def mle_bias(self, u):
-        xi = self.xi
+    def mle_bias(self, xi_mle, n, k):
+        A = self.A(n/k)
         rho = self.rho
-        t = 1/self.tau(u)
-        sig = self.sigma(u)
-        return self.A(t)/(1-rho)/(1+xi-rho) * np.array((xi+1, -sig*rho))
+        g = 1-rho
+        a = -g*A
+        b = g**2 + g*xi_mle + A
+        c = -xi_mle - 1
+        b_xi = (-b + np.sqrt(b**2 - 4*a*c))/(2*a)
+        b_sig = -rho/((1-rho)*(1+xi_mle-A*b_xi-rho))
+        return b_xi, b_sig
+
+    def params_est(self, xi_mle, sig_mle, n, k):
+        A = self.A(n/k)
+        b_xi, b_sig = self.mle_bias(xi_mle, n, k)
+        return xi_mle-A*b_xi, sig_mle/(1+A*b_sig)

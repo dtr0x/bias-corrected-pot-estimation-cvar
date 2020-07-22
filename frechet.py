@@ -7,15 +7,17 @@ class Frechet(Distribution):
         self.gamma = gamma
         self.xi = 1/gamma
         self.rho = -1
+        xi = self.xi
+        rho = self.rho
+        self.b = 1/(1-rho)/(1+xi-rho) * np.array((xi+1, -rho))
 
     def cdf(self, x):
         gamma = self.gamma
         return np.exp(-x**(-gamma))
 
-    def sigma(self, u):
+    def a(self, t):
         gamma = self.gamma
-        t = self.tau(u)
-        return t*(-np.log(1-t))**(-1-1/gamma) / (1-t) / gamma
+        return 1/(gamma*(t-1)) * np.log(t/(t-1))**(-1/gamma-1)
 
     def var(self, alph):
         gamma = self.gamma
