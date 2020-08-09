@@ -29,3 +29,17 @@ def cvar_pot(x, alph, k, dist):
         q = u + sig/xi * (beta**(-xi) - 1)
         c = (q + sig - xi*u)/(1-xi)
         return c, xi, sig
+
+def var_sa(x, alph):
+    return np.sort(x)[int(np.floor(alph*len(x)))]
+
+def cvar_sa(x, alph):
+        q = var_sa(x, alph)
+        y = x[x >= q]
+        return np.mean(y)
+
+def cvar_trunc(x, alph, b):
+    # truncated data CVaR
+    x_trunc = np.array(x)
+    x_trunc[np.where(x_trunc > b)] = b
+    return cvar_sa(x_trunc, alph)

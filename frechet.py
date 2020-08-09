@@ -15,6 +15,10 @@ class Frechet(Distribution):
         gamma = self.gamma
         return np.exp(-x**(-gamma))
 
+    def pdf(self, x):
+        gamma = self.gamma
+        return gamma * x**(-1-gamma) * self.cdf(x)
+
     def a(self, t):
         gamma = self.gamma
         return 1/(gamma*(t-1)) * np.log(t/(t-1))**(-1/gamma-1)
@@ -33,3 +37,7 @@ class Frechet(Distribution):
         gamma = self.gamma
         return -(1+gamma+t*gamma*np.log(1-1/t)) \
                 /((t-1)*gamma*np.log(1-1/t)) - 1/gamma
+
+    def moment(self, p):
+        # requires p < gamma
+        return G(1-p/self.gamma)

@@ -1,18 +1,6 @@
 import numpy as np
 
 class Distribution:
-    def __init__(self, *params):
-        pass
-
-    def var(self, alph):
-        pass
-
-    def cvar(self, alph):
-        pass
-
-    def A(self, t):
-        pass
-
     def rand(self, n):
         p = np.random.uniform(size=n)
         return self.var(p)
@@ -43,11 +31,13 @@ class Distribution:
         return -sig * A * I
 
     def cvar_approx_error(self, t, alph, xi=None, sig=None):
+        A = self.A(t)
+        if A == 0: # no approximation error
+            return 0
         rho = self.rho
         if not (xi and sig):
             xi = self.xi
             sig = self.a(t)
-        A = self.A(t)
         s = 1/t/(1-alph)
         x1 = s**xi/xi/(1-xi)
         x2 = s**(xi+rho)/(xi+rho)/(1-xi-rho)
@@ -56,16 +46,18 @@ class Distribution:
 
     def mle_bias(self, xi_mle, n, k):
         A = self.A(n/k)
-        rho = self.rho
-        g = 1-rho
-        a = -g*A
-        b = g**2 + g*xi_mle + A
-        c = -xi_mle - 1
-        b_xi = (-b + np.sqrt(b**2 - 4*a*c))/(2*a)
-        b_sig = -rho/((1-rho)*(1+xi_mle-A*b_xi-rho))
-        return b_xi, b_sig
+        if A == 0: # no bias
+            return (0, 0, 0)
+        else:
+            rho = self.rho
+            g = 1-rho
+            a = -g*A
+            b = g**2 + g*xi_mle + A
+            c = -xi_mle - 1
+            b_xi = (-b + np.sqrt(b**2 - 4*a*c))/(2*a)
+            b_sig = -rho/((1-rho)*(1+xi_mle-A*b_xi-rho))
+            return b_xi, b_sig, A
 
     def params_est(self, xi_mle, sig_mle, n, k):
-        A = self.A(n/k)
-        b_xi, b_sig = self.mle_bias(xi_mle, n, k)
+        b_xi, b_sig, A = self.mle_bias(xi_mle, n, k)
         return xi_mle-A*b_xi, sig_mle/(1+A*b_sig)

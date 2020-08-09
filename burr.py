@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.special import hyp2f1
+from scipy.special import hyp2f1, beta
 from distribution import Distribution
 
 class Burr(Distribution):
@@ -16,6 +16,11 @@ class Burr(Distribution):
         c = self.c
         d = self.d
         return 1 - (1 + x**c)**(-d)
+
+    def pdf(self, x):
+        c = self.c
+        d = self.d
+        return c*d*x**(c-1)/(1 + x**c)**(d+1)
 
     def a(self, t):
         c = self.c
@@ -38,3 +43,11 @@ class Burr(Distribution):
         c = self.c
         d = self.d
         return (1-c)/(c * d * (t**(1/d) - 1))
+
+    def moment(self, p):
+        # requires p < cd
+        c = self.c
+        d = self.d
+        a = (c * d - p)/c
+        b = (c + p)/c
+        return d * beta(a, b)
