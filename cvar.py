@@ -15,7 +15,7 @@ def gpd_fit(y):
         xi_mle, _, sig_mle = genpareto.fit(y, floc=0)
     return xi_mle, sig_mle
 
-def cvar_pot(x, alph, k, dist):
+def cvar_pot(x, alph, k, dist, cutoff=0.9):
     u, y = get_excesses(x, k)
     n = len(x)
     k = len(y)
@@ -23,7 +23,7 @@ def cvar_pot(x, alph, k, dist):
     xi_mle, sig_mle = gpd_fit(y)
     xi, sig = dist.params_est(xi_mle, sig_mle, n, k)
     beta = (1-alph)/(1-Fu)
-    if xi >= 1:
+    if xi >= cutoff:
         return np.nan, xi, sig
     else:
         q = u + sig/xi * (beta**(-xi) - 1)

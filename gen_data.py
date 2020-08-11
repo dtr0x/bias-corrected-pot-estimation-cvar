@@ -1,8 +1,15 @@
 import numpy as np
 import multiprocessing as mp
-from cvar import cvar_pot
+from cvar import *
 from asymp_var import asymp_var
 from os.path import isfile
+
+def sample_iter_sa(x, alph, sampsizes):
+    cvars = []
+    for n in sampsizes:
+        c = cvar_sa(x[:n], alph)
+        cvars.append(c)
+    return cvars
 
 def sample_iter(x, alph, sampsizes, n_excesses, dist):
     cvar_pot_est = []
