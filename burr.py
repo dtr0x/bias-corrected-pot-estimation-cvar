@@ -12,6 +12,11 @@ class Burr(Distribution):
         rho = self.rho
         self.b = 1/(1-rho)/(1+xi-rho) * np.array((xi+1, -rho))
 
+    def U(self, t):
+        c = self.c
+        d = self.d
+        return (t**(1/d) - 1)**(1/c)
+
     def cdf(self, x):
         c = self.c
         d = self.d

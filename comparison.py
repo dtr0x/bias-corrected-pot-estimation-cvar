@@ -61,7 +61,7 @@ if __name__ == '__main__':
 
     n_dists = len(labels)
     # output dims for paper
-    fig, axs = plt.subplots(2, n_dists, sharex=True, figsize=(6.5, 3))
+    fig, axs = plt.subplots(2, n_dists, sharex=True, figsize=(6.5, 2.5))
 
     for i in range(n_dists):
         axs[0,i].set_title(labels[i])
@@ -94,8 +94,8 @@ if __name__ == '__main__':
     fontP = FontProperties()
     fontP.set_size('small')
     # Create the legend
-    plt.subplots_adjust(right=0.85)
+    plt.tight_layout()
+    plt.subplots_adjust(right=0.85, wspace=0.1, hspace=0.1)
     fig.legend(custom_lines,  line_labels, borderaxespad=0, prop=fontP, loc='right')#bbox_to_anchor=(1, 0.75))
-    #plt.tight_layout()
     fig.savefig('output/comparison.pdf', format='pdf', bbox_inches='tight')
     plt.close("all")
