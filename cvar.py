@@ -19,21 +19,23 @@ def gpd_fit(y):
 def get_params(x, k):
     u, y = get_excesses(x, k)
     xi_mle, sig_mle = gpd_fit(y)
-    k_rho = sample_frac(len(x))
-    rho = rho_est(x, k_rho)
-    A = A_est(x, k, xi_mle, rho)
-    return u, xi_mle, sig_mle, rho, A
+    return u, xi_mle, sig_mle
 
-def cvar_pot(x, alph, k, xi=None, sig=None, cutoff=0.9, debias=True):
+def cvar_pot(x, alph, k, debias=True, k_rho=None, cutoff=0.9):
     n = len(x)
     Fu  = 1 - k/n
     beta = (1-alph)/(1-Fu)
-    if not (xi or sig):
-        u, xi_mle, sig_mle, rho, A = get_params(x, k)
-        if debias:
-            xi, sig = debias_params(xi_mle, sig_mle, rho, A)
-        else:
-            xi, sig = xi_mle, sig_mle
+
+    u, xi_mle, sig_mle = get_params(x, k)
+
+    if debias:
+        if k_rho is None:
+            k_rho = n-1
+        rho = rho_est(x, k_rho)
+        A = A_est(x, k, xi_mle, rho)
+        xi, sig = debias_params(xi_mle, sig_mle, rho, A)
+    else:
+        xi, sig = xi_mle, sig_mle
 
     if xi > cutoff:
         return np.nan

@@ -19,7 +19,8 @@ def A_est(x, k, xi, rho):
 #     a = M_est(x, k, 1)
 #     b = M_est(x, k, 2)
 #     mom = a + 1 - 1/2 * (1-a**2/b)**(-1)
-#     return (mom+rho)/mom * (1-rho)**2 * (b - 2*a**2) / (2*rho*a)
+#     A = (mom+rho)/mom * (1-rho)**2 * (b - 2*a**2) / (2*rho*a)
+#     return A, mom
 
 # def T_est(x, k):
 #     a = np.log(M_est(x, k, 1)/G(2))
@@ -59,7 +60,7 @@ def mle_bias_est(xi, rho):
 def debias_params(xi_mle, sig_mle, rho, A):
     b = mle_bias_est(xi_mle, rho)
     xi = xi_mle - A*b[0]
-    sig = sig_mle/(1+A*b[1])
+    sig = sig_mle * (1-A*b[1])
     return xi, sig
 
 # def debias_params(x, k, xi_mle, sig_mle):
