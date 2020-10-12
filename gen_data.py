@@ -1,99 +1,82 @@
-import numpy as np
+from frechet import Frechet
+from burr import Burr
 import multiprocessing as mp
-from cvar import *
-from asymp_var import asymp_var
-from os.path import isfile
+from cvar_multiprocess import *
 
-def sample_iter_sa(x, alph, sampsizes):
-    cvars = []
-    for n in sampsizes:
-        c = cvar_sa(x[:n], alph)
-        cvars.append(c)
-    return cvars
+# generate samples from distributions
+def gen_samples(dists, s, n, seed=0):
+    data = []
+    for d in dists:
+        np.random.seed(seed)
+        data.append(d.rand((s, n)))
+    return np.array(data)
 
-def sample_iter(x, alph, sampsizes, n_excesses, dist):
-    cvar_pot_est = []
-    xi_est = []
-    sig_est = []
-    approx_error = []
-    avar = []
-    for i in range(len(sampsizes)):
-        n = sampsizes[i]
-        k = n_excesses[i]
-        t = n/k
-        beta = k/(n*(1-alph))
-        c, xi, sig = cvar_pot(x[:n], alph, k, dist)
-        if (np.isnan(c)):
-            cvar_pot_est.append(c)
-            xi_est.append(c)
-            sig_est.append(c)
-            approx_error.append(c)
-            avar.append(c)
-        else:
-            cvar_pot_est.append(c)
-            xi_est.append(xi)
-            sig_est.append(sig)
-            approx_error.append(dist.cvar_approx_error(t, alph, xi, sig))
-            avar.append(asymp_var(xi, beta)/k)
+# generate CVaR estimates from sample data
+def get_cvars(dist_data, alph, sampsizes, k, k_rho):
+    n_cpus = mp.cpu_count()
+    pool = mp.Pool(n_cpus)
+    cvars_upot = [] # unbiased POT estimates
+    cvars_bpot = [] # biased POT estimates
+    cvars_sa = [] # sample average estimates
+    for d, kr in zip(dist_data, k_rho):
+        result1 = [pool.apply_async(sample_iter_pot, args=(x, alph, sampsizes, k, True, kr)) for x in d]
+        result2 = [pool.apply_async(sample_iter_pot, args=(x, alph, sampsizes, k, False)) for x in d]
+        result3 = [pool.apply_async(sample_iter_sa, args=(x, alph, sampsizes)) for x in d]
+        c_est1 = np.array([r.get() for r in result1])
+        c_est2 = np.array([r.get() for r in result2])
+        c_est3 = np.array([r.get() for r in result3])
+        cvars_upot.append(c_est1)
+        cvars_bpot.append(c_est2)
+        cvars_sa.append(c_est3)
 
-    return cvar_pot_est, xi_est, sig_est, approx_error, avar
+    return np.array([cvars_upot, cvars_bpot, cvars_sa])
 
-def gen_data(dists, alph, n_samples, sampsizes, n_excesses):
-    np.random.seed(7)
-    n = sampsizes[-1]
+if __name__ == '__main__':
+    # Burr distributions
+    xi = 2/3
+    rhos = np.linspace(-0.25, -2, 8)
+    d = -1/rhos
+    c = 1/(xi*d)
+    params = [(i,j) for i,j in zip(c,d)]
+    burr_dists = [Burr(*p) for p in params]
 
-    if isfile('data/calc.npz'):
-        data = np.load('data/calc.npz')
-        cvar_pot_est = data['cvar_pot_est']
-        xi_est = data['xi_est']
-        sig_est = data['sig_est']
-        approx_error = data['approx_error']
-        avar = data['avar']
-    else:
-        if isfile('data/samples.npz'):
-            data = np.load('data/samples.npz')
-            samples = data['samples']
-        else:
-            samples = []
-            for d in dists:
-                samples.append(d.rand((n_samples, n)))
-            samples = np.asarray(samples)
-            np.savez_compressed('data/samples.npz', samples=samples)
+    # Frechet distributions
+    gamma = np.linspace(1.25, 3, 8)
+    frec_dists = [Frechet(p) for p in gamma]
 
-        n_cpus = mp.cpu_count()
-        pool = mp.Pool(n_cpus)
-        cvar_pot_est = []
-        xi_est = []
-        sig_est = []
-        approx_error = []
-        avar = []
-        for s, d in zip(samples, dists):
-            result = [pool.apply_async(sample_iter,
-                        args=(x, alph, sampsizes, n_excesses, d)) for x in s]
-            c_d = []
-            xi_d = []
-            sig_d = []
-            ae_d = []
-            av_d = []
-            for r in result:
-                c, xi, si, ae, av = r.get()
-                c_d.append(c)
-                xi_d.append(xi)
-                sig_d.append(si)
-                ae_d.append(ae)
-                av_d.append(av)
-            cvar_pot_est.append(np.asarray(c_d))
-            xi_est.append(np.asarray(xi_d))
-            sig_est.append(np.asarray(sig_d))
-            approx_error.append(np.asarray(ae_d))
-            avar.append(np.asarray(av_d))
+    # sample sizes to test CVaR estimation
+    N = np.array([10000, 20000, 30000, 40000, 50000])
+    n_max = N[-1]
 
-        cvar_pot_est=np.asarray(cvar_pot_est)
-        xi_est=np.asarray(xi_est)
-        sig_est=np.asarray(sig_est)
-        approx_error=np.asarray(approx_error)
-        avar=np.asarray(avar)
-        np.savez_compressed('data/calc.npz', cvar_pot_est=cvar_pot_est, \
-        xi_est=xi_est, sig_est=sig_est, approx_error=approx_error, avar=avar)
+    # number of samples
+    s = 1000
 
-    return cvar_pot_est, xi_est, sig_est, approx_error, avar
+    # burr hyperparams
+    k_b_rho = [np.ceil(N**0.85).astype(int),
+                np.ceil(N**0.92).astype(int),
+                N-1,
+                np.ceil(N**0.97).astype(int),
+                np.ceil(N**0.97).astype(int),
+                np.ceil(N**0.97).astype(int),
+                np.ceil(N**0.97).astype(int),
+                np.ceil(N**0.98).astype(int)]
+
+    # frechet hyperparams
+    k_f_rho = [N-1]*len(frec_dists)
+
+    k = np.ceil(N**0.8).astype(int)
+
+    # generate data
+    burr_data = gen_samples(burr_dists, s, n_max)
+    frec_data = gen_samples(frec_dists, s, n_max)
+
+    # CVaR level
+    alph = 0.999
+
+    burr_result = get_cvars(burr_data, alph, N, k, k_b_rho)
+    frec_result = get_cvars(frec_data, alph, N, k, k_f_rho)
+
+    np.save('data/burr_samples.npy', burr_data)
+    np.save('data/frec_samples.npy', frec_data)
+    np.save('data/burr_cvars.npy', burr_result)
+    np.save('data/frec_cvars.npy', frec_result)

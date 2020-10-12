@@ -45,7 +45,10 @@ def cvar_pot(x, alph, k, debias=True, k_rho=None, cutoff=0.9):
 
     if debias:
         approx_error = approx_error_est(xi, sig, rho, A, alph, n, k)
-        cvar -= approx_error
+        if approx_error > cvar:
+            return np.nan
+        else:
+            cvar -= approx_error
 
     return cvar
 
