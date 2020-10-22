@@ -1,20 +1,20 @@
-from param_search_util import *
+from rho_search_util import *
 from burr import Burr
 
 if __name__ == '__main__':
     s = 100
     n = 25000
 
+    # Burr distributions
     xi = 2/3
-    rhos = np.linspace(-0.25, -2, 8)
-    d = -1/rhos
+    rho = -np.array([0.25, 0.4, 0.75, 1.5, 2])
+    d = -1/rho
     c = 1/(xi*d)
     params = [(i,j) for i,j in zip(c,d)]
-    dists = [Burr(*p) for p in params]
+    burr_dists = [Burr(*p) for p in params]
 
     T = []
-    k_vals = []
-    for D in dists:
+    for D in burr_dists:
         np.random.seed(0)
         data = D.rand((s, n))
         r = D.rho
@@ -23,6 +23,5 @@ if __name__ == '__main__':
         print(r_est, r_mse, k_rho)
         print('')
         T.append(theta(n, k_rho))
-        k_vals.append(k_rho)
 
-    np.save('k_rho_burr.npy', np.array(k_vals))
+    np.save('rho_samp_theta.npy', np.array(T))

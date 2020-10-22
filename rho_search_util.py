@@ -2,6 +2,9 @@ import numpy as np
 import multiprocessing as mp
 from estimators import rho_est
 
+N_CPUs = mp.cpu_count()
+POOL = mp.Pool(N_CPUs)
+
 def theta(n, k):
     return np.around(np.log(k)/np.log(n), 2)
 
@@ -9,8 +12,6 @@ def mse(x, true):
     return np.nanmean((x-true)**2, axis=0)
 
 def rho_mse(data, k, rho):
-    N_CPUs = mp.cpu_count()
-    POOL = mp.Pool(N_CPUs)
     result = [POOL.apply_async(rho_est, args=(x, k)) for x in data]
     r_est = np.array([r.get() for r in result])
     return np.mean(r_est), mse(r_est, rho)

@@ -47,14 +47,14 @@ if __name__ == '__main__':
 
     # Burr distributions
     xi = 2/3
-    rhos = np.linspace(-0.25, -2, 8)
-    d = -1/rhos
+    rho = -np.array([0.25, 0.4, 0.75, 1.5, 2])
+    d = -1/rho
     c = 1/(xi*d)
     params = [(i,j) for i,j in zip(c,d)]
     burr_dists = [Burr(*p) for p in params]
 
     # Frechet distributions
-    gamma = np.linspace(1.25, 3, 8)
+    gamma = np.linspace(1.5, 2.5, 5)
     frec_dists = [Frechet(p) for p in gamma]
 
     # sample sizes to test CVaR estimation
@@ -75,140 +75,58 @@ if __name__ == '__main__':
     burr_nanrate = cvar_nans(burr_cvars)
     frec_nanrate = cvar_nans(frec_cvars)
 
-    plt.style.use('seaborn')
-    plt.rc('axes', titlesize=10)     # fontsize of the axes title
-    plt.rc('axes', labelsize=8)    # fontsize of the x and y labels
-    plt.rc('xtick', labelsize=6)    # fontsize of the tick labels
-    plt.rc('ytick', labelsize=6)    # fontsize of the tick labels
-    plt.rc('font', family='san-serif')
+    # plt.style.use('seaborn')
+    # plt.rc('axes', titlesize=8)     # fontsize of the axes title
+    # plt.rc('axes', labelsize=6)    # fontsize of the x and y labels
+    # plt.rc('xtick', labelsize=4)    # fontsize of the tick labels
+    # plt.rc('ytick', labelsize=4)    # fontsize of the tick labels
+    # plt.rc('legend', fontsize=4)    # fontsize of the tick labels
+    # plt.rc('font', family='serif')
+    #
+    # # uncomment this line for Latex rendering
+    # #plt.rc('text', usetex=True)
+    #
+    # n_dists = len(burr_dists)
+    # fig, axs = plt.subplots(4, n_dists, sharex=True, figsize=(6.8, 4.2))
+    #
+    # burr_titles = ["Burr({}, {})".format(c,d) for c,d in np.around(params, 2)]
+    # frec_titles = ["Frechet({})".format(g) for g in np.around(gamma, 2)]
+    #
+    # for i in range(len(burr_dists)):
+    #     # Burr plots
+    #     # RMSE
+    #     axs[0,i].plot(N, burr_rmse[i,0], linestyle='--', linewidth=0.5, marker='.', markersize=5, color='k')
+    #     axs[0,i].plot(N, burr_rmse[i,1], linestyle='--', linewidth=0.5, marker='.', markersize=5, color='r')
+    #     axs[0,i].plot(N, burr_rmse[i,2], linestyle='--', linewidth=0.5, marker='.', markersize=5, color='b')
+    #     # Bias
+    #     axs[1,i].plot(N, burr_bias[i,0], linestyle='--', linewidth=0.5, marker='.', markersize=5, color='k')
+    #     axs[1,i].plot(N, burr_bias[i,1], linestyle='--', linewidth=0.5, marker='.', markersize=5, color='r')
+    #     axs[1,i].plot(N, burr_bias[i,2], linestyle='--', linewidth=0.5, marker='.', markersize=5, color='b')
+    #
+    #     # Frechet plots
+    #     # RMSE
+    #     axs[2,i].plot(N, frec_rmse[i,0], linestyle='--', linewidth=0.5, marker='.', markersize=5, color='k')
+    #     axs[2,i].plot(N, frec_rmse[i,1], linestyle='--', linewidth=0.5, marker='.', markersize=5, color='r')
+    #     axs[2,i].plot(N, frec_rmse[i,2], linestyle='--', linewidth=0.5, marker='.', markersize=5, color='b')
+    #     # Bias
+    #     axs[3,i].plot(N, frec_bias[i,0], linestyle='--', linewidth=0.5, marker='.', markersize=5, color='k')
+    #     axs[3,i].plot(N, frec_bias[i,1], linestyle='--', linewidth=0.5, marker='.', markersize=5, color='r')
+    #     axs[3,i].plot(N, frec_bias[i,2], linestyle='--', linewidth=0.5, marker='.', markersize=5, color='b')
+    #
+    #     axs[3,i].set_xlabel('sample size')
+    #
+    #     axs[0,i].set_title(burr_titles[i])
+    #     axs[2,i].set_title(frec_titles[i])
 
-    # uncomment this line for Latex rendering
-    #plt.rc('text', usetex=True)
-
-    n_dists = len(burr_dists)
-
-    fig, axs = plt.subplots(2, n_dists, sharex=True)
-
-    # RMSE plots
-    for i in range(len(burr_dists)):
-        # Burr plots
-        axs[0,i].plot(N, burr_rmse[i,0], linestyle='--', linewidth=1, marker='.', color='k')
-        axs[0,i].plot(N, burr_rmse[i,1], linestyle='--', linewidth=1, marker='.', color='r')
-        axs[0,i].plot(N, burr_rmse[i,2], linestyle='--', linewidth=1, marker='.', color='b')
-        # Frechet plots
-        axs[1,i].plot(N, frec_rmse[i,0], linestyle='--', linewidth=1, marker='.', color='k')
-        axs[1,i].plot(N, frec_rmse[i,1], linestyle='--', linewidth=1, marker='.', color='r')
-        axs[1,i].plot(N, frec_rmse[i,2], linestyle='--', linewidth=1, marker='.', color='b')
-        axs[1,i].set_xlabel('sample size')
-
-    axs[0,0].set_ylabel('RMSE')
-    axs[1,0].set_ylabel('RMSE')
-    axs[0,0].legend(['UPOT', 'BPOT', 'SA'])
-
-    plt.tight_layout()
-    plt.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
-    fig.savefig('plots/rmse.pdf', format='pdf', bbox_inches='tight')
-
-    plt.show()
-    plt.clf()
-
-    # bias Burr plots
-    # fig, axs = plt.subplots(2, 2, sharex=True)
-    #
-    # axs[0,0].set_title(burr_labels[0])
-    # axs[0,1].set_title(burr_labels[1])
-    # axs[1,0].set_title(burr_labels[2])
-    # axs[1,1].set_title(burr_labels[3])
-    #
-    # axs[0,0].plot(N, burr_bias[0,0], linestyle='--', linewidth=1, marker='.', color='k')
-    # axs[0,0].plot(N, burr_bias[0,1], linestyle='--', linewidth=1, marker='.', color='r')
-    # axs[0,0].plot(N, burr_bias[0,2], linestyle='--', linewidth=1, marker='.', color='b')
-    #
-    # axs[0,1].plot(N, burr_bias[1,0], linestyle='--', linewidth=1, marker='.', color='k')
-    # axs[0,1].plot(N, burr_bias[1,1], linestyle='--', linewidth=1, marker='.', color='r')
-    # axs[0,1].plot(N, burr_bias[1,2], linestyle='--', linewidth=1, marker='.', color='b')
-    #
-    # axs[1,0].plot(N, burr_bias[2,0], linestyle='--', linewidth=1, marker='.', color='k')
-    # axs[1,0].plot(N, burr_bias[2,1], linestyle='--', linewidth=1, marker='.', color='r')
-    # axs[1,0].plot(N, burr_bias[2,2], linestyle='--', linewidth=1, marker='.', color='b')
-    #
-    # axs[1,1].plot(N, burr_bias[3,0], linestyle='--', linewidth=1, marker='.', color='k')
-    # axs[1,1].plot(N, burr_bias[3,1], linestyle='--', linewidth=1, marker='.', color='r')
-    # axs[1,1].plot(N, burr_bias[3,2], linestyle='--', linewidth=1, marker='.', color='b')
-    #
-    # axs[1,0].set_xlabel('sample size')
-    # axs[1,1].set_xlabel('sample size')
-    # axs[0,0].set_ylabel('bias')
-    # axs[1,0].set_ylabel('bias')
-    # axs[0,0].legend(['UPOT', 'POT', 'SA'])
-    #
-    # plt.tight_layout()
-    # plt.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
-    # fig.savefig('plots/burr_bias.pdf', format='pdf', bbox_inches='tight')
-    #
-    # fig, axs = plt.subplots(2, 2, sharex=True)
-    #
-    # axs[0,0].set_title(frec_labels[0])
-    # axs[0,1].set_title(frec_labels[1])
-    # axs[1,0].set_title(frec_labels[2])
-    # axs[1,1].set_title(frec_labels[3])
-    #
-    # axs[0,0].plot(N, frec_rmse[0,0], linestyle='--', linewidth=1, marker='.', color='k')
-    # axs[0,0].plot(N, frec_rmse[0,1], linestyle='--', linewidth=1, marker='.', color='r')
-    # axs[0,0].plot(N, frec_rmse[0,2], linestyle='--', linewidth=1, marker='.', color='b')
-    #
-    # axs[0,1].plot(N, frec_rmse[1,0], linestyle='--', linewidth=1, marker='.', color='k')
-    # axs[0,1].plot(N, frec_rmse[1,1], linestyle='--', linewidth=1, marker='.', color='r')
-    # axs[0,1].plot(N, frec_rmse[1,2], linestyle='--', linewidth=1, marker='.', color='b')
-    #
-    # axs[1,0].plot(N, frec_rmse[2,0], linestyle='--', linewidth=1, marker='.', color='k')
-    # axs[1,0].plot(N, frec_rmse[2,1], linestyle='--', linewidth=1, marker='.', color='r')
-    # axs[1,0].plot(N, frec_rmse[2,2], linestyle='--', linewidth=1, marker='.', color='b')
-    #
-    # axs[1,1].plot(N, frec_rmse[3,0], linestyle='--', linewidth=1, marker='.', color='k')
-    # axs[1,1].plot(N, frec_rmse[3,1], linestyle='--', linewidth=1, marker='.', color='r')
-    # axs[1,1].plot(N, frec_rmse[3,2], linestyle='--', linewidth=1, marker='.', color='b')
-    #
-    # axs[1,0].set_xlabel('sample size')
-    # axs[1,1].set_xlabel('sample size')
     # axs[0,0].set_ylabel('RMSE')
-    # axs[1,0].set_ylabel('RMSE')
-    # axs[0,0].legend(['UPOT', 'POT', 'SA'])
+    # axs[1,0].set_ylabel('absolute bias')
+    # axs[2,0].set_ylabel('RMSE')
+    # axs[3,0].set_ylabel('absolute bias')
+    # axs[0,0].legend(['UPOT', 'BPOT', 'SA'])
     #
-    # plt.tight_layout()
+    # plt.tight_layout(pad=0.5)
     # plt.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
-    # fig.savefig('plots/frec_rmse.pdf', format='pdf', bbox_inches='tight')
+    # fig.savefig('plots/all.pdf', format='pdf', bbox_inches='tight')
     #
-    # # bias frec plots
-    # fig, axs = plt.subplots(2, 2, sharex=True)
-    #
-    # axs[0,0].set_title(frec_labels[0])
-    # axs[0,1].set_title(frec_labels[1])
-    # axs[1,0].set_title(frec_labels[2])
-    # axs[1,1].set_title(frec_labels[3])
-    #
-    # axs[0,0].plot(N, frec_bias[0,0], linestyle='--', linewidth=1, marker='.', color='k')
-    # axs[0,0].plot(N, frec_bias[0,1], linestyle='--', linewidth=1, marker='.', color='r')
-    # axs[0,0].plot(N, frec_bias[0,2], linestyle='--', linewidth=1, marker='.', color='b')
-    #
-    # axs[0,1].plot(N, frec_bias[1,0], linestyle='--', linewidth=1, marker='.', color='k')
-    # axs[0,1].plot(N, frec_bias[1,1], linestyle='--', linewidth=1, marker='.', color='r')
-    # axs[0,1].plot(N, frec_bias[1,2], linestyle='--', linewidth=1, marker='.', color='b')
-    #
-    # axs[1,0].plot(N, frec_bias[2,0], linestyle='--', linewidth=1, marker='.', color='k')
-    # axs[1,0].plot(N, frec_bias[2,1], linestyle='--', linewidth=1, marker='.', color='r')
-    # axs[1,0].plot(N, frec_bias[2,2], linestyle='--', linewidth=1, marker='.', color='b')
-    #
-    # axs[1,1].plot(N, frec_bias[3,0], linestyle='--', linewidth=1, marker='.', color='k')
-    # axs[1,1].plot(N, frec_bias[3,1], linestyle='--', linewidth=1, marker='.', color='r')
-    # axs[1,1].plot(N, frec_bias[3,2], linestyle='--', linewidth=1, marker='.', color='b')
-    #
-    # axs[1,0].set_xlabel('sample size')
-    # axs[1,1].set_xlabel('sample size')
-    # axs[0,0].set_ylabel('bias')
-    # axs[1,0].set_ylabel('bias')
-    # axs[0,0].legend(['UPOT', 'POT', 'SA'])
-    #
-    # plt.tight_layout()
-    # plt.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
-    # fig.savefig('plots/frec_bias.pdf', format='pdf', bbox_inches='tight')
+    # plt.show()
+    # plt.clf()
