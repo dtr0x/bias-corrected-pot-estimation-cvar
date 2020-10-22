@@ -41,6 +41,13 @@ def cvar_nans(cvars):
         nas.append([n1,n2])
     return np.array(nas)
 
+def get_means(cvars):
+    m = np.nanmean(cvars[:,:,:,-1], axis=2)
+    f = lambda x: ' & '.join(np.around(x, 2).astype(str))
+    m_str = np.apply_along_axis(f, 1, m.transpose())
+    for s in m_str:
+        print(s)
+
 if __name__ == '__main__':
     burr_cvars = np.load('data/burr_cvars.npy')
     frec_cvars = np.load('data/frec_cvars.npy')
@@ -75,58 +82,58 @@ if __name__ == '__main__':
     burr_nanrate = cvar_nans(burr_cvars)
     frec_nanrate = cvar_nans(frec_cvars)
 
-    # plt.style.use('seaborn')
-    # plt.rc('axes', titlesize=8)     # fontsize of the axes title
-    # plt.rc('axes', labelsize=6)    # fontsize of the x and y labels
-    # plt.rc('xtick', labelsize=4)    # fontsize of the tick labels
-    # plt.rc('ytick', labelsize=4)    # fontsize of the tick labels
-    # plt.rc('legend', fontsize=4)    # fontsize of the tick labels
-    # plt.rc('font', family='serif')
-    #
-    # # uncomment this line for Latex rendering
-    # #plt.rc('text', usetex=True)
-    #
-    # n_dists = len(burr_dists)
-    # fig, axs = plt.subplots(4, n_dists, sharex=True, figsize=(6.8, 4.2))
-    #
-    # burr_titles = ["Burr({}, {})".format(c,d) for c,d in np.around(params, 2)]
-    # frec_titles = ["Frechet({})".format(g) for g in np.around(gamma, 2)]
-    #
-    # for i in range(len(burr_dists)):
-    #     # Burr plots
-    #     # RMSE
-    #     axs[0,i].plot(N, burr_rmse[i,0], linestyle='--', linewidth=0.5, marker='.', markersize=5, color='k')
-    #     axs[0,i].plot(N, burr_rmse[i,1], linestyle='--', linewidth=0.5, marker='.', markersize=5, color='r')
-    #     axs[0,i].plot(N, burr_rmse[i,2], linestyle='--', linewidth=0.5, marker='.', markersize=5, color='b')
-    #     # Bias
-    #     axs[1,i].plot(N, burr_bias[i,0], linestyle='--', linewidth=0.5, marker='.', markersize=5, color='k')
-    #     axs[1,i].plot(N, burr_bias[i,1], linestyle='--', linewidth=0.5, marker='.', markersize=5, color='r')
-    #     axs[1,i].plot(N, burr_bias[i,2], linestyle='--', linewidth=0.5, marker='.', markersize=5, color='b')
-    #
-    #     # Frechet plots
-    #     # RMSE
-    #     axs[2,i].plot(N, frec_rmse[i,0], linestyle='--', linewidth=0.5, marker='.', markersize=5, color='k')
-    #     axs[2,i].plot(N, frec_rmse[i,1], linestyle='--', linewidth=0.5, marker='.', markersize=5, color='r')
-    #     axs[2,i].plot(N, frec_rmse[i,2], linestyle='--', linewidth=0.5, marker='.', markersize=5, color='b')
-    #     # Bias
-    #     axs[3,i].plot(N, frec_bias[i,0], linestyle='--', linewidth=0.5, marker='.', markersize=5, color='k')
-    #     axs[3,i].plot(N, frec_bias[i,1], linestyle='--', linewidth=0.5, marker='.', markersize=5, color='r')
-    #     axs[3,i].plot(N, frec_bias[i,2], linestyle='--', linewidth=0.5, marker='.', markersize=5, color='b')
-    #
-    #     axs[3,i].set_xlabel('sample size')
-    #
-    #     axs[0,i].set_title(burr_titles[i])
-    #     axs[2,i].set_title(frec_titles[i])
+    plt.style.use('seaborn')
+    plt.rc('axes', titlesize=8)     # fontsize of the axes title
+    plt.rc('axes', labelsize=6)    # fontsize of the x and y labels
+    plt.rc('xtick', labelsize=4)    # fontsize of the tick labels
+    plt.rc('ytick', labelsize=4)    # fontsize of the tick labels
+    plt.rc('legend', fontsize=4)    # fontsize of the tick labels
+    plt.rc('font', family='serif')
 
-    # axs[0,0].set_ylabel('RMSE')
-    # axs[1,0].set_ylabel('absolute bias')
-    # axs[2,0].set_ylabel('RMSE')
-    # axs[3,0].set_ylabel('absolute bias')
-    # axs[0,0].legend(['UPOT', 'BPOT', 'SA'])
-    #
-    # plt.tight_layout(pad=0.5)
-    # plt.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
-    # fig.savefig('plots/all.pdf', format='pdf', bbox_inches='tight')
-    #
-    # plt.show()
-    # plt.clf()
+    # uncomment this line for Latex rendering
+    #plt.rc('text', usetex=True)
+
+    n_dists = len(burr_dists)
+    fig, axs = plt.subplots(4, n_dists, sharex=True, figsize=(6.8, 4.2))
+
+    burr_titles = ["Burr({}, {})".format(c,d) for c,d in np.around(params, 2)]
+    frec_titles = ["Frechet({})".format(g) for g in np.around(gamma, 2)]
+
+    for i in range(len(burr_dists)):
+        # Burr plots
+        # RMSE
+        axs[0,i].plot(N, burr_rmse[i,0], linestyle='--', linewidth=0.5, marker='.', markersize=5, color='k')
+        axs[0,i].plot(N, burr_rmse[i,1], linestyle='--', linewidth=0.5, marker='.', markersize=5, color='r')
+        axs[0,i].plot(N, burr_rmse[i,2], linestyle='--', linewidth=0.5, marker='.', markersize=5, color='b')
+        # Bias
+        axs[1,i].plot(N, burr_bias[i,0], linestyle='--', linewidth=0.5, marker='.', markersize=5, color='k')
+        axs[1,i].plot(N, burr_bias[i,1], linestyle='--', linewidth=0.5, marker='.', markersize=5, color='r')
+        axs[1,i].plot(N, burr_bias[i,2], linestyle='--', linewidth=0.5, marker='.', markersize=5, color='b')
+
+        # Frechet plots
+        # RMSE
+        axs[2,i].plot(N, frec_rmse[i,0], linestyle='--', linewidth=0.5, marker='.', markersize=5, color='k')
+        axs[2,i].plot(N, frec_rmse[i,1], linestyle='--', linewidth=0.5, marker='.', markersize=5, color='r')
+        axs[2,i].plot(N, frec_rmse[i,2], linestyle='--', linewidth=0.5, marker='.', markersize=5, color='b')
+        # Bias
+        axs[3,i].plot(N, frec_bias[i,0], linestyle='--', linewidth=0.5, marker='.', markersize=5, color='k')
+        axs[3,i].plot(N, frec_bias[i,1], linestyle='--', linewidth=0.5, marker='.', markersize=5, color='r')
+        axs[3,i].plot(N, frec_bias[i,2], linestyle='--', linewidth=0.5, marker='.', markersize=5, color='b')
+
+        axs[3,i].set_xlabel('sample size')
+
+        axs[0,i].set_title(burr_titles[i])
+        axs[2,i].set_title(frec_titles[i])
+
+    axs[0,0].set_ylabel('RMSE')
+    axs[1,0].set_ylabel('absolute bias')
+    axs[2,0].set_ylabel('RMSE')
+    axs[3,0].set_ylabel('absolute bias')
+    axs[0,0].legend(['UPOT', 'BPOT', 'SA'])
+
+    plt.tight_layout(pad=0.5)
+    plt.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
+    fig.savefig('plots/all.pdf', format='pdf', bbox_inches='tight')
+
+    plt.show()
+    plt.clf()
