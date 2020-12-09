@@ -1,4 +1,4 @@
-## Code for paper "Bias-Corrected Peaks-Over-Threshold Estimation of the CVaR."
+## Code for paper *Bias-Corrected Peaks-Over-Threshold Estimation of the CVaR.*
 This code will generate all data used in simulations presented in the paper and produce plots. Parameters can be adjusted to produce results for other scenarios.
 
 ## Requirements:
