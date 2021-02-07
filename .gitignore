@@ -1,5 +1,7 @@
 __pycache__
 *.pyc
-test*
 data
 plots
+*.sh
+*old*
+*test*
