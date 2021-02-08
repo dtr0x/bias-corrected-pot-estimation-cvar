@@ -13,12 +13,12 @@ def avar_mle(xi):
 
 # gradient term wrt xi
 def d_xi(xi, beta):
-    return beta**xi * (2*xi + xi*(1-xi)*np.log(beta) - 1) / (xi*(1-xi))**2
+    return beta**xi * (2*xi + xi*(1-xi)*np.log(beta) - 1)/(xi*(1-xi))**2 + 1/xi**2
 
 
 # gradient term wrt sigma
 def d_sig(xi, beta):
-    return (beta**xi + xi - 1) / (xi*(1-xi))
+    return (beta**xi + xi - 1)/(xi*(1-xi))
 
 
 # asymptotic variance of (scaled) POT CVaR estimate
