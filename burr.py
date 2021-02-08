@@ -10,12 +10,9 @@ class Burr(Distribution):
         self.rho = -1/d
         xi = self.xi
         rho = self.rho
-        self.b = 1/(1-rho)/(1+xi-rho) * np.array((xi+1, -rho))
 
-    def U(self, t):
-        c = self.c
-        d = self.d
-        return (t**(1/d) - 1)**(1/c)
+    def get_label(self):
+        return "Burr({}, {})".format(round(self.c, 2), round(self.d, 2))
 
     def cdf(self, x):
         c = self.c
@@ -48,11 +45,3 @@ class Burr(Distribution):
         c = self.c
         d = self.d
         return (1-c)/(c * d * (t**(1/d) - 1))
-
-    def moment(self, p):
-        # requires p < cd
-        c = self.c
-        d = self.d
-        a = (c * d - p)/c
-        b = (c + p)/c
-        return d * beta(a, b)

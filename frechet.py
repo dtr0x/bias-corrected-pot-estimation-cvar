@@ -9,7 +9,9 @@ class Frechet(Distribution):
         self.rho = -1
         xi = self.xi
         rho = self.rho
-        self.b = 1/(1-rho)/(1+xi-rho) * np.array((xi+1, -rho))
+
+    def get_label(self):
+        return "Frechet({})".format(round(self.gamma, 2))
 
     def cdf(self, x):
         gamma = self.gamma
@@ -37,7 +39,3 @@ class Frechet(Distribution):
         gamma = self.gamma
         return -(1+gamma+t*gamma*np.log(1-1/t)) \
                 /((t-1)*gamma*np.log(1-1/t)) - 1/gamma
-
-    def moment(self, p):
-        # requires p < gamma
-        return G(1-p/self.gamma)
