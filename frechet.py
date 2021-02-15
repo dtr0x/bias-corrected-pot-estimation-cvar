@@ -39,3 +39,18 @@ class Frechet(Distribution):
         gamma = self.gamma
         return -(1+gamma+t*gamma*np.log(1-1/t)) \
                 /((t-1)*gamma*np.log(1-1/t)) - 1/gamma
+
+
+    # moment of truncated Frechet distribution
+    def mom(self, r, alph):
+        q = self.var(alph)
+        g = self.gamma
+        k = 1-np.exp(-q**(-g))
+        return (G(1-r/g) - Ginc(1-r/g, q**(-g)) * G(1-r/g)) / k
+
+
+    # asymptotic variance of sample average estimator for Frechet distribution
+    def avar(self, alph):
+        m1 = self.mom(1, alph)
+        m2 = self.mom(2, alph)
+        return (m2 - m1**2)/(1-alph)
