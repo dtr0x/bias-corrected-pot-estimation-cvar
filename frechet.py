@@ -11,7 +11,7 @@ class Frechet(Distribution):
         rho = self.rho
 
     def get_label(self):
-        return "Frechet({})".format(round(self.gamma, 2))
+        return "Fr\\\'echet({})".format(round(self.gamma, 2))
 
     def cdf(self, x):
         gamma = self.gamma
