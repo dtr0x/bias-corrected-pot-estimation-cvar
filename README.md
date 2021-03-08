@@ -15,5 +15,3 @@ The following files can be used to reproduce plots in the paper:
  * **dist_plots.py** Produces RMSE and absolute bias plots from the generated CVaR data
  * **coverage_prob.py** Produces plots of coverage probability from the generated CVaR data
  * **asymp_var.py** Comparison of UPOT and SA asymptotic variance for the Frechet distribution
-
-Generated samples are not provided due to size constraints (>5GB) but can be easily re-generated with the same seed. Since computing all estimated quantities is quite memory-intensive (requiring the multiprocessing module), the generated CVaRs from **run_sim.py** are already provided in the data folder.
