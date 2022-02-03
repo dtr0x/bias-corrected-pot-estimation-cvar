@@ -1,4 +1,7 @@
-## Code for paper "Bias-Corrected Peaks-Over-Threshold Estimation of the CVaR."
+## Bias-Corrected Peaks-Over-Threshold Estimation of the CVaR (UAI 2021)
+
+https://proceedings.mlr.press/v161/troop21a.html
+
 This code will generate all data used in simulations presented in the paper and produce plots. Parameters can be adjusted to produce results for other scenarios.
 
 ## Requirements:
@@ -15,3 +18,5 @@ The following files can be used to reproduce plots in the paper:
  * **dist_plots.py** Produces RMSE and absolute bias plots from the generated CVaR data
  * **coverage_prob.py** Produces plots of coverage probability from the generated CVaR data
  * **asymp_var.py** Comparison of UPOT and SA asymptotic variance for the Frechet distribution
+
+
